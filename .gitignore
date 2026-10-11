@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# React / Vite
+node_modules/
+dist/
+.env.local
+
+# Jupyter
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+
+# Generated datasets and models
+data/raw/
+data/processed/
+data/model/
+models/
+
+# MLflow
+mlruns/
+mlartifacts/
