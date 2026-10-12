@@ -425,6 +425,11 @@ def clean_duels(events):
 
 def clean_clearances(events):
     clearances = events[events["type"] == "Clearance"].copy()
+
+    # clearance_body_part missing in some competitions
+    if "clearance_body_part" not in clearances.columns:
+        clearances["clearance_body_part"] = pd.NA
+
     clearances = clearances[clearance_columns].reset_index(drop=True)
 
     print("Cleaning clearances...")
@@ -820,9 +825,16 @@ def calculate_player_minutes(events):
         "Bad Behaviour",
         "Foul Committed",
     ]
+
+    # player_off_permanent field missing for some competitions, set to False in case
+    player_off_permanent = (
+        events["player_off_permanent"].fillna(False)
+        if "player_off_permanent" in events.columns
+        else pd.Series(False, index=events.index)
+    )
     timed_events = events[
         events["type"].isin(relevant_types)
-        | events["player_off_permanent"].eq(True)
+        | player_off_permanent.eq(True)
     ].copy()
 
     # Add a continuous match clock to each event.

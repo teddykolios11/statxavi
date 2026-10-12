@@ -400,11 +400,12 @@ function HexagonProfile({ positionGroup, percentiles }) {
   );
 }
 
-async function fetchPlayerProfile(playerName, signal) {
+async function fetchPlayerProfile(playerName, season, signal) {
   const playerPath = `/players/${encodeURIComponent(playerName)}`;
+  const seasonQuery = new URLSearchParams({ season });
   const [featuresResponse, percentilesResponse] = await Promise.all([
-    fetch(`${playerPath}/features`, { signal }),
-    fetch(`${playerPath}/percentiles`, { signal }),
+    fetch(`${playerPath}/features?${seasonQuery}`, { signal }),
+    fetch(`${playerPath}/percentiles?${seasonQuery}`, { signal }),
   ]);
 
   if (!featuresResponse.ok || !percentilesResponse.ok) {
@@ -424,7 +425,7 @@ async function fetchPlayerProfile(playerName, signal) {
   };
 }
 
-function App() {
+function App({ season }) {
   const [query, setQuery] = useState("");
   const [players, setPlayers] = useState([]);
   const [searchError, setSearchError] = useState("");
@@ -465,7 +466,11 @@ function App() {
     setPlayers([]);
     setHasSearched(false);
 
-    fetch(`/players?query=${encodeURIComponent(searchTerm)}`, {
+    const searchParams = new URLSearchParams({
+      query: searchTerm,
+      season,
+    });
+    fetch(`/players?${searchParams}`, {
       signal: controller.signal,
     })
       .then((response) => {
@@ -496,7 +501,7 @@ function App() {
       active = false;
       controller.abort();
     };
-  }, [query]);
+  }, [query, season]);
 
   useEffect(() => {
     if (!selectedPlayer) {
@@ -515,9 +520,12 @@ function App() {
     setPlayerPercentiles(null);
 
     const playerPath = `/players/${encodeURIComponent(selectedPlayer)}`;
+    const seasonQuery = new URLSearchParams({ season });
     Promise.all([
-      fetch(`${playerPath}/info`, { signal: controller.signal }),
-      fetch(`${playerPath}/position_percentiles`, {
+      fetch(`${playerPath}/info?${seasonQuery}`, {
+        signal: controller.signal,
+      }),
+      fetch(`${playerPath}/position_percentiles?${seasonQuery}`, {
         signal: controller.signal,
       }),
     ])
@@ -552,7 +560,7 @@ function App() {
       active = false;
       controller.abort();
     };
-  }, [selectedPlayer]);
+  }, [selectedPlayer, season]);
 
   useEffect(() => {
     if (!comparisonPlayer || !selectedPlayer) {
@@ -569,8 +577,8 @@ function App() {
     setComparisonProfiles(null);
 
     Promise.all([
-      fetchPlayerProfile(selectedPlayer, controller.signal),
-      fetchPlayerProfile(comparisonPlayer, controller.signal),
+      fetchPlayerProfile(selectedPlayer, season, controller.signal),
+      fetchPlayerProfile(comparisonPlayer, season, controller.signal),
     ])
       .then(([originalProfile, comparisonProfile]) => {
         if (active) {
@@ -592,7 +600,7 @@ function App() {
       active = false;
       controller.abort();
     };
-  }, [comparisonPlayer, selectedPlayer]);
+  }, [comparisonPlayer, selectedPlayer, season]);
 
   useEffect(() => {
     if (!selectedPlayer) {
@@ -608,8 +616,12 @@ function App() {
     setSimilarityError("");
     setSimilarPlayers([]);
 
+    const similarParams = new URLSearchParams({
+      season,
+      n_neighbors: "5",
+    });
     fetch(
-      `/players/${encodeURIComponent(selectedPlayer)}/similar?n_neighbors=5`,
+      `/players/${encodeURIComponent(selectedPlayer)}/similar?${similarParams}`,
       { signal: controller.signal },
     )
       .then((response) => {
@@ -638,7 +650,7 @@ function App() {
       active = false;
       controller.abort();
     };
-  }, [selectedPlayer]);
+  }, [selectedPlayer, season]);
 
   const comparisonRows = comparisonProfiles
     ? Object.entries(comparisonProfiles[0].features).filter(

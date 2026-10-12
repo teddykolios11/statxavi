@@ -16,39 +16,51 @@ app = FastAPI(
 
 project_dir = Path(__file__).resolve().parent.parent.parent
 
-features_path = (
-    project_dir
-    / "data"
-    / "model"
-    / "2015-2016"
-    / "pca_features.parquet"
-)
-percentiles_path = (
-    project_dir
-    / "data"
-    / "model"
-    / "2015-2016"
-    / "percentile_features.parquet"
-)
-position_percentiles_path = (
-    project_dir
-    / "data"
-    / "model"
-    / "2015-2016"
-    / "position_percentile_features.parquet"
-)
-scores_path = (
-    project_dir
-    / "models"
-    / "pca"
-    / "2015-2016"
-    / "player_scores.parquet"
-)
+AVAILABLE_SEASONS = [
+    "2015-2016",
+    "2018",
+    "2020",
+    "2022",
+    "2024",
+]
 
-player_features = pd.read_parquet(features_path)
-player_percentiles = pd.read_parquet(percentiles_path)
-player_position_percentiles = pd.read_parquet(position_percentiles_path)
-player_scores = pd.read_parquet(scores_path)
+DEFAULT_SEASON = "2015-2016"
+
+
+def load_season_data(season):
+    model_dir = project_dir / "data" / "model" / season
+    pca_dir = project_dir / "models" / "pca" / season
+
+    return {
+        "features": pd.read_parquet(
+            model_dir / "pca_features.parquet"
+        ),
+        "percentiles": pd.read_parquet(
+            model_dir / "percentile_features.parquet"
+        ),
+        "position_percentiles": pd.read_parquet(
+            model_dir / "position_percentile_features.parquet"
+        ),
+        "scores": pd.read_parquet(
+            pca_dir / "player_scores.parquet"
+        ),
+    }
+
+season_data = {
+    season: load_season_data(season)
+    for season in AVAILABLE_SEASONS
+}
+
+
+def get_season_data(season):
+    if season not in season_data:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid season: {season}. "
+                   f"Available seasons: {AVAILABLE_SEASONS}"
+        )
+
+    return season_data[season]
 
 
 @app.get("/players/{player_name}/similar")
@@ -56,8 +68,10 @@ def get_similar_players(
     player_name: str,
     n_neighbors: int = 5,
     position_group: str | None = None,
+    season: str = DEFAULT_SEASON,
 ):
     try:
+        player_scores = get_season_data(season)["scores"] # get PCA results for selected season
         results = find_similar_players(
             player_name=player_name,
             player_scores=player_scores,
@@ -80,7 +94,8 @@ def get_similar_players(
 
 
 @app.get("/players/{player_name}/info")
-def get_player_info(player_name: str):
+def get_player_info(player_name: str, season: str = DEFAULT_SEASON):
+    player_features = get_season_data(season)["features"]
     player_matches = player_features.loc[
         player_features["player"].str.casefold().eq(player_name.casefold())
     ]
@@ -109,7 +124,8 @@ def get_player_info(player_name: str):
 
 
 @app.get("/players/{player_name}/percentiles")
-def get_player_percentiles(player_name: str):
+def get_player_percentiles(player_name: str, season: str = DEFAULT_SEASON):
+    player_percentiles = get_season_data(season)["percentiles"]
     player_matches = player_percentiles.loc[
         player_percentiles["player"].str.casefold().eq(player_name.casefold())
     ]
@@ -137,7 +153,8 @@ def get_player_percentiles(player_name: str):
 
 
 @app.get("/players/{player_name}/position_percentiles")
-def get_player_position_percentiles(player_name: str):
+def get_player_position_percentiles(player_name: str, season: str = DEFAULT_SEASON):
+    player_position_percentiles = get_season_data(season)["position_percentiles"]
     player_matches = player_position_percentiles.loc[
         player_position_percentiles["player"].str.casefold().eq(player_name.casefold())
     ]
@@ -165,7 +182,8 @@ def get_player_position_percentiles(player_name: str):
 
 
 @app.get("/players/{player_name}/features")
-def get_player_features(player_name: str):
+def get_player_features(player_name: str, season: str = DEFAULT_SEASON):
+    player_features = get_season_data(season)["features"]
     player_matches = player_features.loc[
         player_features["player"].str.casefold().eq(player_name.casefold())
     ]
@@ -193,7 +211,9 @@ def get_player_features(player_name: str):
 
 
 @app.get("/players")
-def search_players(query: str):
+def search_players(query: str, season: str = DEFAULT_SEASON):
+    player_scores = get_season_data(season)["scores"]
+
     player_matches = player_scores.loc[
         player_scores["player"].str.contains(
             query,
@@ -220,3 +240,17 @@ def search_players(query: str):
     )
 
     return player_matches.to_dict(orient="records")
+
+
+@app.get("/seasons")
+def get_available_seasons():
+    return {
+        "seasons": [
+            {"id": "2015-2016", "label": "2015/16 European Leagues"},
+            {"id": "2018", "label": "2018 FIFA World Cup"},
+            {"id": "2020", "label": "2020 UEFA Euro"},
+            {"id": "2022", "label": "2022 FIFA World Cup"},
+            {"id": "2024", "label": "2024 UEFA Euro"},
+        ],
+        "default": DEFAULT_SEASON,
+    }

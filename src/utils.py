@@ -12,11 +12,17 @@ top_league_comp_ids = {
  'La Liga': 11,
  'Ligue 1': 7,
  'Premier League': 2,
- 'Serie A': 12
+ 'Serie A': 12,
+ 'UEFA Euro': 55,
+ 'FIFA World Cup': 43
 }
 
 season_ids = {
-    '2015/2016': 27
+    '2015/2016': 27,
+    '2018': 3,
+    '2020': 43,
+    '2022': 106,
+    '2024': 282
 }
 
 POSITION_GROUPS = {

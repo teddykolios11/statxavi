@@ -6,6 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/players": "http://127.0.0.1:8000",
+      "/seasons": "http://127.0.0.1:8000",
     },
   },
 });
