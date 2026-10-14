@@ -11,6 +11,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.manifold import trustworthiness
 from sklearn.metrics.pairwise import euclidean_distances
+from scipy.spatial.distance import pdist
 
 from utils import season_ids, top_league_comp_ids, PCA_VOLUME_COLUMNS, PCA_FEATURE_COLUMNS, PCA_N_COMPONENTS
 
@@ -305,6 +306,15 @@ def fit_pca(season_id, n_components=PCA_N_COMPONENTS, save_artifacts=True):
         .reset_index()
     )
 
+    # calculate median similarity distance for downstream similarity score
+    median_pairwise_distance = float(
+        np.median(pdist(player_coordinates, metric="euclidean"))
+    )
+    if median_pairwise_distance <= 0:
+        raise ValueError(
+            "Median pairwise distance must be positive."
+        )
+
     metadata["pca"] = {
         "n_components": int(pca.n_components_),
         "original_n_features": len(feature_columns),
@@ -315,6 +325,7 @@ def fit_pca(season_id, n_components=PCA_N_COMPONENTS, save_artifacts=True):
         "total_explained_variance_ratio": float(
             np.sum(pca.explained_variance_ratio_)
         ),
+        "median_pairwise_distance": median_pairwise_distance
     }
 
     # Save fitted models and analysis-ready outputs.

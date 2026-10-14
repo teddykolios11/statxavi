@@ -440,6 +440,7 @@ function App({ season }) {
   const [similarPlayers, setSimilarPlayers] = useState([]);
   const [similarityError, setSimilarityError] = useState("");
   const [isLoadingSimilar, setIsLoadingSimilar] = useState(false);
+  const [similarPositionGroup, setSimilarPositionGroup] = useState("");
   const [comparisonProfiles, setComparisonProfiles] = useState(null);
   const [comparisonError, setComparisonError] = useState("");
   const [isLoadingComparison, setIsLoadingComparison] = useState(false);
@@ -620,6 +621,9 @@ function App({ season }) {
       season,
       n_neighbors: "5",
     });
+    if (similarPositionGroup) {
+      similarParams.set("position_group", similarPositionGroup);
+    }
     fetch(
       `/players/${encodeURIComponent(selectedPlayer)}/similar?${similarParams}`,
       { signal: controller.signal },
@@ -650,7 +654,7 @@ function App({ season }) {
       active = false;
       controller.abort();
     };
-  }, [selectedPlayer, season]);
+  }, [selectedPlayer, season, similarPositionGroup]);
 
   const comparisonRows = comparisonProfiles
     ? Object.entries(comparisonProfiles[0].features).filter(
@@ -848,7 +852,33 @@ function App({ season }) {
           </div>
 
           <section className="player-content-panel similarity-results" aria-live="polite">
-            <h2>Players similar to {selectedPlayer}</h2>
+            <div className="similarity-section-heading">
+              <h2>Statistically similar to {selectedPlayer}</h2>
+              <label className="similarity-position-filter">
+                <span className="visually-hidden">
+                  Filter similar players by position group
+                </span>
+                <select
+                  className="similarity-position-select"
+                  value={similarPositionGroup}
+                  aria-label="Filter similar players by position group"
+                  onChange={(event) =>
+                    setSimilarPositionGroup(event.target.value)
+                  }
+                >
+                  <option value="">All Positions</option>
+                  <option value="Goalkeeper">Goalkeeper</option>
+                  <option value="Fullback">Fullback</option>
+                  <option value="Center Back">Center Back</option>
+                  <option value="Center Midfielder">Center Midfielder</option>
+                  <option value="Outside Midfielder">Outside Midfielder</option>
+                  <option value="Attacking Midfielder">
+                    Attacking Midfielder
+                  </option>
+                  <option value="Forward">Forward</option>
+                </select>
+              </label>
+            </div>
             {isLoadingSimilar && <p className="message">Loading players...</p>}
             {similarityError && (
               <p className="message error">{similarityError}</p>
@@ -856,36 +886,61 @@ function App({ season }) {
             {!isLoadingSimilar &&
               !similarityError &&
               similarPlayers.length === 0 && (
-                <p className="message">No similar players found.</p>
+                <p className="message">
+                  {similarPositionGroup
+                    ? "No similar players found for this position group."
+                    : "No similar players found."}
+                </p>
               )}
             {similarPlayers.length > 0 && (
               <ul className="similar-player-list">
-                {similarPlayers.map((player) => (
-                  <li className="similar-player-card" key={player.player}>
-                    <button
-                      type="button"
-                      className="player-name similar-player-name"
-                      onClick={() => selectPlayer(player.player)}
-                    >
-                      {player.player}
-                    </button>
-                    <span className="player-details">
-                      {player.primary_position}
-                    </span>
-                    {player.teams?.length > 0 && (
-                      <span className="player-team">
-                        {player.teams.join(", ")}
+                {similarPlayers.map((player) => {
+                  const score = Number(player.similarity_score);
+                  const scoreColor =
+                    score >= 75
+                      ? "high"
+                      : score >= 65
+                        ? "medium"
+                        : "low";
+
+                  return (
+                    <li className="similar-player-card" key={player.player}>
+                      <div className="similar-player-heading">
+                        <button
+                          type="button"
+                          className="player-name similar-player-name"
+                          onClick={() => selectPlayer(player.player)}
+                        >
+                          {player.player}
+                        </button>
+                        <span
+                          className={`similarity-score similarity-score-${scoreColor}`}
+                          aria-label={`Similarity: ${Math.round(score)}%`}
+                        >
+                          <span className="similarity-score-label">
+                            Similarity
+                          </span>
+                          <span>{Math.round(score)}%</span>
+                        </span>
+                      </div>
+                      <span className="player-details">
+                        {player.primary_position}
                       </span>
-                    )}
-                    <button
-                      type="button"
-                      className="compare-button"
-                      onClick={() => setComparisonPlayer(player.player)}
-                    >
-                      Compare Profiles
-                    </button>
-                  </li>
-                ))}
+                      {player.teams?.length > 0 && (
+                        <span className="player-team">
+                          {player.teams.join(", ")}
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        className="compare-button"
+                        onClick={() => setComparisonPlayer(player.player)}
+                      >
+                        Compare Profiles
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </section>

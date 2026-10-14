@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 import numpy as np
+import json
 
 from fastapi import FastAPI, HTTPException
 
@@ -31,6 +32,9 @@ def load_season_data(season):
     model_dir = project_dir / "data" / "model" / season
     pca_dir = project_dir / "models" / "pca" / season
 
+    with (pca_dir / "metadata.json").open("r") as file:
+        metadata = json.load(file)
+
     return {
         "features": pd.read_parquet(
             model_dir / "pca_features.parquet"
@@ -44,6 +48,7 @@ def load_season_data(season):
         "scores": pd.read_parquet(
             pca_dir / "player_scores.parquet"
         ),
+        "metadata": metadata,
     }
 
 season_data = {
@@ -71,10 +76,13 @@ def get_similar_players(
     season: str = DEFAULT_SEASON,
 ):
     try:
-        player_scores = get_season_data(season)["scores"] # get PCA results for selected season
+        season_data = get_season_data(season)
+        player_scores = season_data["scores"] # get PCA results for selected season
+        median_distance = season_data["metadata"]["pca"]["median_pairwise_distance"]
         results = find_similar_players(
             player_name=player_name,
             player_scores=player_scores,
+            median_pairwise_distance=median_distance,
             n_neighbors=n_neighbors,
             position_group=position_group,
         )

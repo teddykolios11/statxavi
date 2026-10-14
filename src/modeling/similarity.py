@@ -5,6 +5,7 @@ from src.utils import PCA_N_COMPONENTS
 def find_similar_players(
     player_name,
     player_scores,
+    median_pairwise_distance,
     n_neighbors=5,
     position_group=None,
 ):
@@ -40,6 +41,13 @@ def find_similar_players(
         axis=1,
     )
 
+    # Calculate similarity score relative to median distance
+    candidates["similarity_score"] = (
+        100 * 2 ** (
+            -candidates["distance"] / median_pairwise_distance
+        )
+    )
+
     return (
         candidates
         .nsmallest(n_neighbors, "distance")
@@ -49,6 +57,7 @@ def find_similar_players(
             "primary_position",
             "position_group",
             "distance",
+            "similarity_score"
         ]]
     )
 
