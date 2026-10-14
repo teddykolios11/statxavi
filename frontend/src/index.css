@@ -625,6 +625,116 @@ h1 {
   margin: 0 auto;
 }
 
+.pca-map-panel {
+  width: min(100%, 60rem);
+  min-width: 0;
+  margin-inline: auto;
+}
+
+.pca-map-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.pca-map-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem 0.75rem;
+}
+
+.pca-axis-control {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #586174;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.pca-axis-control select {
+  padding: 0.4rem 1.5rem 0.4rem 0.5rem;
+  color: #172033;
+  background: #fff;
+  border: 1px solid #cbd2dc;
+  border-radius: 0.35rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.pca-axis-control select:focus-visible {
+  border-color: #315bd6;
+  outline: 2px solid rgb(49 91 214 / 18%);
+}
+
+.pca-position-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #586174;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.pca-position-toggle input {
+  accent-color: #315bd6;
+}
+
+.pca-map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-top: 1rem;
+  color: #586174;
+  font-size: 0.75rem;
+}
+
+.pca-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.pca-legend-swatch,
+.pca-legend-selected {
+  width: 0.65rem;
+  height: 0.65rem;
+  flex: none;
+  border-radius: 50%;
+}
+
+.pca-legend-selected {
+  background: #fff;
+  border: 2px solid #172033;
+}
+
+.pca-chart {
+  width: 100%;
+  height: 25rem;
+  margin-top: 0.75rem;
+}
+
+.pca-tooltip {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.65rem 0.75rem;
+  color: #172033;
+  background: #fff;
+  border: 1px solid #cbd2dc;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.5rem 1.25rem rgb(23 32 51 / 16%);
+  font-size: 0.75rem;
+}
+
+.pca-tooltip strong {
+  margin-bottom: 0.15rem;
+  font-size: 0.8125rem;
+}
+
 .similarity-results h2 {
   margin: 0;
   font-size: 1.125rem;
@@ -737,6 +847,19 @@ h1 {
 }
 
 @media (max-width: 480px) {
+  .pca-map-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pca-map-controls {
+    justify-content: flex-start;
+  }
+
+  .pca-chart {
+    height: 19rem;
+  }
+
   .similarity-section-heading {
     align-items: flex-start;
     flex-wrap: wrap;

@@ -7,7 +7,7 @@ import json
 from fastapi import FastAPI, HTTPException
 
 from src.modeling.similarity import find_similar_players
-from src.utils import PCA_FEATURE_COLUMNS
+from src.utils import PCA_FEATURE_COLUMNS, PCA_N_COMPONENTS
 
 
 app = FastAPI(
@@ -66,6 +66,30 @@ def get_season_data(season):
         )
 
     return season_data[season]
+
+
+@app.get("/players/pca-map")
+def get_pca_map(season: str = DEFAULT_SEASON):
+    player_scores = get_season_data(season)["scores"]
+
+    pc_cols = [f"PC{i}" for i in range(1, PCA_N_COMPONENTS + 1)]
+
+    columns = [
+        "player_id",
+        "player",
+        "teams",
+        "position_group",
+    ] + pc_cols
+
+    pca_map_scores = player_scores[columns].copy()
+
+    pca_map_scores["teams"] = pca_map_scores["teams"].apply(
+        lambda value: value.tolist()
+        if isinstance(value, np.ndarray)
+        else value
+    )
+
+    return pca_map_scores.to_dict(orient="records")
 
 
 @app.get("/players/{player_name}/similar")

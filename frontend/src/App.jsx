@@ -1,4 +1,13 @@
 import { useEffect, useState } from "react";
+import {
+  CartesianGrid,
+  ResponsiveContainer,
+  Scatter,
+  ScatterChart,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 const percentileColorByMetric = {
   goals: "blue",
@@ -425,6 +434,219 @@ async function fetchPlayerProfile(playerName, season, signal) {
   };
 }
 
+const pcaPositionColors = {
+  Goalkeeper: "#315bd6",
+  Fullback: "#067647",
+  "Center Back": "#b54708",
+  "Center Midfielder": "#7f56d9",
+  "Outside Midfielder": "#c11574",
+  "Attacking Midfielder": "#0086c9",
+  Forward: "#b42318",
+};
+
+const pcaPositionGroups = Object.keys(pcaPositionColors);
+const pcaComponents = Array.from({ length: 10 }, (_, index) => `PC${index + 1}`);
+
+function PCAMapTooltip({ active, payload, xAxis, yAxis }) {
+  if (!active || !payload?.length) {
+    return null;
+  }
+
+  const player = payload[0].payload;
+  const teams = Array.isArray(player.teams)
+    ? player.teams.join(", ")
+    : player.teams || "Unknown";
+
+  return (
+    <div className="pca-tooltip">
+      <strong>{player.player}</strong>
+      <span>Team(s): {teams}</span>
+      <span>Position: {player.position_group}</span>
+      <span>
+        {xAxis}: {Number(player[xAxis]).toFixed(3)}
+      </span>
+      <span>
+        {yAxis}: {Number(player[yAxis]).toFixed(3)}
+      </span>
+    </div>
+  );
+}
+
+function PCAMap({
+  players,
+  isLoading,
+  error,
+  selectedPlayer,
+  selectedPositionGroup,
+  isLoadingPositionGroup,
+}) {
+  const [xAxis, setXAxis] = useState("PC1");
+  const [yAxis, setYAxis] = useState("PC2");
+  const [samePositionOnly, setSamePositionOnly] = useState(true);
+
+  const canApplyPositionFilter =
+    !samePositionOnly || Boolean(selectedPositionGroup);
+  const chartPlayers = canApplyPositionFilter
+    ? players.filter((player) => {
+        const hasCoordinates =
+          Number.isFinite(Number(player[xAxis])) &&
+          Number.isFinite(Number(player[yAxis]));
+        const matchesPosition =
+          !samePositionOnly ||
+          player.position_group === selectedPositionGroup;
+        return hasCoordinates && matchesPosition;
+      })
+    : [];
+
+  return (
+    <section className="player-content-panel pca-map-panel">
+      <div className="pca-map-heading">
+        <h2>Player PCA Map</h2>
+        <div className="pca-map-controls">
+          <label className="pca-axis-control">
+            <span>X-axis</span>
+            <select
+              value={xAxis}
+              aria-label="PCA map X-axis"
+              onChange={(event) => setXAxis(event.target.value)}
+            >
+              {pcaComponents.map((component) => (
+                <option key={component} value={component}>
+                  {component}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="pca-axis-control">
+            <span>Y-axis</span>
+            <select
+              value={yAxis}
+              aria-label="PCA map Y-axis"
+              onChange={(event) => setYAxis(event.target.value)}
+            >
+              {pcaComponents.map((component) => (
+                <option key={component} value={component}>
+                  {component}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="pca-position-toggle">
+            <input
+              type="checkbox"
+              checked={samePositionOnly}
+              onChange={(event) => setSamePositionOnly(event.target.checked)}
+            />
+            <span>Same Position Group Only</span>
+          </label>
+        </div>
+      </div>
+
+      <div className="pca-map-legend" aria-label="Position group legend">
+        {pcaPositionGroups.map((positionGroup) => (
+          <span className="pca-legend-item" key={positionGroup}>
+            <span
+              className="pca-legend-swatch"
+              style={{ backgroundColor: pcaPositionColors[positionGroup] }}
+              aria-hidden="true"
+            />
+            {positionGroup}
+          </span>
+        ))}
+        <span className="pca-legend-item">
+          <span className="pca-legend-selected" aria-hidden="true" />
+          Selected player
+        </span>
+      </div>
+
+      {isLoading && <p className="message">Loading PCA map...</p>}
+      {error && (
+        <p className="message error" role="alert">
+          {error}
+        </p>
+      )}
+      {!isLoading && !error && players.length === 0 && (
+        <p className="message">No PCA player data found for this season.</p>
+      )}
+      {!isLoading && !error && players.length > 0 && (
+        <>
+          {samePositionOnly && !selectedPositionGroup && (
+            <p className="message">
+              {isLoadingPositionGroup
+                ? "Loading the selected player's position group..."
+                : "The selected player's position group is unavailable."}
+            </p>
+          )}
+          {canApplyPositionFilter && chartPlayers.length === 0 && (
+            <p className="message">
+              {samePositionOnly
+                ? "No PCA players found for this position group."
+                : "No players have coordinates for these axes."}
+            </p>
+          )}
+          {chartPlayers.length > 0 && (
+            <div className="pca-chart">
+              <ResponsiveContainer width="100%" height="100%">
+                <ScatterChart margin={{ top: 12, right: 24, bottom: 12, left: 8 }}>
+                  <CartesianGrid stroke="#e4e7ec" />
+                  <XAxis
+                    type="number"
+                    dataKey={xAxis}
+                    name={xAxis}
+                    tick={{ fill: "#586174", fontSize: 12 }}
+                    label={{
+                      value: xAxis,
+                      position: "insideBottom",
+                      offset: -6,
+                      fill: "#586174",
+                    }}
+                  />
+                  <YAxis
+                    type="number"
+                    dataKey={yAxis}
+                    name={yAxis}
+                    tick={{ fill: "#586174", fontSize: 12 }}
+                    label={{
+                      value: yAxis,
+                      angle: -90,
+                      position: "insideLeft",
+                      fill: "#586174",
+                    }}
+                  />
+                  <Tooltip
+                    content={
+                      <PCAMapTooltip xAxis={xAxis} yAxis={yAxis} />
+                    }
+                    cursor={{ strokeDasharray: "3 3" }}
+                  />
+                  <Scatter
+                    data={chartPlayers}
+                    shape={({ cx, cy, payload }) => {
+                      const color =
+                        pcaPositionColors[payload.position_group] ?? "#586174";
+                      const isSelected = payload.player === selectedPlayer;
+                      return (
+                        <circle
+                          cx={cx}
+                          cy={cy}
+                          r={isSelected ? 7 : 4}
+                          fill={color}
+                          stroke={isSelected ? "#172033" : "#fff"}
+                          strokeWidth={isSelected ? 2 : 1}
+                        />
+                      );
+                    }}
+                  />
+                </ScatterChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+
 function App({ season }) {
   const [query, setQuery] = useState("");
   const [players, setPlayers] = useState([]);
@@ -444,11 +666,54 @@ function App({ season }) {
   const [comparisonProfiles, setComparisonProfiles] = useState(null);
   const [comparisonError, setComparisonError] = useState("");
   const [isLoadingComparison, setIsLoadingComparison] = useState(false);
+  const [pcaPlayers, setPcaPlayers] = useState([]);
+  const [pcaMapError, setPcaMapError] = useState("");
+  const [isLoadingPcaMap, setIsLoadingPcaMap] = useState(false);
 
   function selectPlayer(playerName) {
     setQuery(playerName);
     setSelectedPlayer(playerName);
   }
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
+    const seasonParams = new URLSearchParams({ season });
+    setIsLoadingPcaMap(true);
+    setPcaMapError("");
+    setPcaPlayers([]);
+
+    fetch(`/players/pca-map?${seasonParams}`, { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Could not load the PCA map. Please try again.");
+        }
+        return response.json();
+      })
+      .then((results) => {
+        if (!Array.isArray(results)) {
+          throw new Error("The PCA map response was invalid. Please try again.");
+        }
+        if (active) {
+          setPcaPlayers(results);
+        }
+      })
+      .catch((requestError) => {
+        if (active) {
+          setPcaMapError(requestError.message);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setIsLoadingPcaMap(false);
+        }
+      });
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [season]);
 
   useEffect(() => {
     const searchTerm = query.trim();
@@ -944,6 +1209,14 @@ function App({ season }) {
               </ul>
             )}
           </section>
+          <PCAMap
+            players={pcaPlayers}
+            isLoading={isLoadingPcaMap}
+            error={pcaMapError}
+            selectedPlayer={selectedPlayer}
+            selectedPositionGroup={playerInfo?.position_group}
+            isLoadingPositionGroup={isLoadingPlayerInfo}
+          />
         </div>
       )}
     </main>
