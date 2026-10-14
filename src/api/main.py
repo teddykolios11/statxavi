@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 import json
+import pickle
 
 from fastapi import FastAPI, HTTPException
 
@@ -32,6 +33,9 @@ def load_season_data(season):
     model_dir = project_dir / "data" / "model" / season
     pca_dir = project_dir / "models" / "pca" / season
 
+    with (pca_dir / "scaler.pkl").open("rb") as file:
+        scaler = pickle.load(file)
+
     with (pca_dir / "metadata.json").open("r") as file:
         metadata = json.load(file)
 
@@ -48,6 +52,7 @@ def load_season_data(season):
         "scores": pd.read_parquet(
             pca_dir / "player_scores.parquet"
         ),
+        "scaler": scaler,
         "metadata": metadata,
     }
 
@@ -123,6 +128,53 @@ def get_similar_players(
     )
 
     return results.to_dict(orient="records")
+
+
+@app.get("/players/{player_name}/feature_differences")
+def get_feature_differences(
+    player_name: str,
+    comparison_player: str,
+    season: str = DEFAULT_SEASON,
+):
+    season_data = get_season_data(season)
+    player_features = season_data["features"]
+    scaler = season_data["scaler"]
+
+    # Retrieve both players
+    player_a = player_features.loc[player_features["player"] == player_name]
+    player_b = player_features.loc[player_features["player"] == comparison_player]
+
+    if player_a.empty or player_b.empty:
+        raise HTTPException(status_code=404, detail="Player not found")
+
+    # Use the exact features and order from the fitted scaler
+    feature_cols = list(PCA_FEATURE_COLUMNS)
+
+    # Standardize using the existing fitted scaler
+    a_scaled = scaler.transform(player_a[feature_cols])[0]
+    b_scaled = scaler.transform(player_b[feature_cols])[0]
+
+    # Calculate feature-level differences
+    differences = []
+
+    for feature, a, b in zip(feature_cols, a_scaled, b_scaled):
+        differences.append({
+            "feature": feature,
+            "player_a_z": round(float(a), 3),
+            "player_b_z": round(float(b), 3),
+            "difference": round(float(a - b), 3),
+            "absolute_difference": round(float(abs(a - b)), 3),
+        })
+
+    # Most similar features first
+    differences.sort(key=lambda item: item["absolute_difference"])
+
+    return {
+        "player_a": player_name,
+        "player_b": comparison_player,
+        "season": season,
+        "differences": differences,
+    }
 
 
 @app.get("/players/{player_name}/info")

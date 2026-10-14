@@ -208,6 +208,62 @@ function formatMetricName(metric) {
     .replace(/\bXA\b/g, "xA");
 }
 
+function FeatureDifferenceTable({ title, differences }) {
+  return (
+    <div className="feature-difference-table">
+      <h3>{title}</h3>
+      <div className="profile-table-wrapper">
+        <table className="profile-table">
+          <thead>
+            <tr>
+              <th scope="col">Feature</th>
+              <th scope="col" className="difference-value-heading">
+                Standardized Difference
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {differences.length > 0 ? (
+              differences.map(({ feature, difference }) => {
+                const roundedDifference = Number(
+                  Number(difference).toFixed(2),
+                );
+                const differenceClass =
+                  roundedDifference > 0
+                    ? "positive"
+                    : roundedDifference < 0
+                      ? "negative"
+                      : "neutral";
+                const formattedDifference =
+                  roundedDifference === 0
+                    ? "0.00"
+                    : `${roundedDifference > 0 ? "+" : ""}${roundedDifference.toFixed(2)}`;
+
+                return (
+                  <tr key={feature}>
+                    <th scope="row">{formatMetricName(feature)}</th>
+                    <td
+                      className={`difference-value difference-value-${differenceClass}`}
+                    >
+                      {formattedDifference}
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td className="difference-empty" colSpan="2">
+                  No feature differences available.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 function PercentileBar({ metric, percentile }) {
   const boundedPercentile = Math.min(100, Math.max(0, percentile));
   const color = percentileColorByMetric[
@@ -666,6 +722,10 @@ function App({ season }) {
   const [comparisonProfiles, setComparisonProfiles] = useState(null);
   const [comparisonError, setComparisonError] = useState("");
   const [isLoadingComparison, setIsLoadingComparison] = useState(false);
+  const [featureDifferences, setFeatureDifferences] = useState(null);
+  const [featureDifferencesError, setFeatureDifferencesError] = useState("");
+  const [isLoadingFeatureDifferences, setIsLoadingFeatureDifferences] =
+    useState(false);
   const [pcaPlayers, setPcaPlayers] = useState([]);
   const [pcaMapError, setPcaMapError] = useState("");
   const [isLoadingPcaMap, setIsLoadingPcaMap] = useState(false);
@@ -833,6 +893,9 @@ function App({ season }) {
       setComparisonProfiles(null);
       setComparisonError("");
       setIsLoadingComparison(false);
+      setFeatureDifferences(null);
+      setFeatureDifferencesError("");
+      setIsLoadingFeatureDifferences(false);
       return undefined;
     }
 
@@ -841,6 +904,9 @@ function App({ season }) {
     setIsLoadingComparison(true);
     setComparisonError("");
     setComparisonProfiles(null);
+    setIsLoadingFeatureDifferences(true);
+    setFeatureDifferencesError("");
+    setFeatureDifferences(null);
 
     Promise.all([
       fetchPlayerProfile(selectedPlayer, season, controller.signal),
@@ -859,6 +925,57 @@ function App({ season }) {
       .finally(() => {
         if (active) {
           setIsLoadingComparison(false);
+        }
+      });
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [comparisonPlayer, selectedPlayer, season]);
+
+  useEffect(() => {
+    if (!comparisonPlayer || !selectedPlayer) {
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    let active = true;
+    const differenceParams = new URLSearchParams({
+      comparison_player: comparisonPlayer,
+      season,
+    });
+
+    fetch(
+      `/players/${encodeURIComponent(selectedPlayer)}/feature_differences?${differenceParams}`,
+      { signal: controller.signal },
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(
+            "Could not load feature differences. Please try again.",
+          );
+        }
+        return response.json();
+      })
+      .then((result) => {
+        if (!Array.isArray(result.differences)) {
+          throw new Error(
+            "Feature differences were returned in an unexpected format.",
+          );
+        }
+        if (active) {
+          setFeatureDifferences(result.differences);
+        }
+      })
+      .catch((error) => {
+        if (active) {
+          setFeatureDifferencesError(error.message);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setIsLoadingFeatureDifferences(false);
         }
       });
 
@@ -947,6 +1064,50 @@ function App({ season }) {
         {comparisonError && (
           <p className="message error">{comparisonError}</p>
         )}
+        <section
+          className="feature-differences-section"
+          aria-labelledby="feature-differences-title"
+          aria-live="polite"
+        >
+          <h2 id="feature-differences-title" className="visually-hidden">
+            Feature similarities and differences
+          </h2>
+          {isLoadingFeatureDifferences && (
+            <p className="message">Loading feature differences...</p>
+          )}
+          {featureDifferencesError && (
+            <p className="message error" role="status">
+              {featureDifferencesError}
+            </p>
+          )}
+          {!isLoadingFeatureDifferences &&
+            !featureDifferencesError &&
+            featureDifferences && (
+              <>
+                <div className="feature-differences-grid">
+                  <FeatureDifferenceTable
+                    title="Most Similar Attributes"
+                    differences={featureDifferences.slice(0, 5)}
+                  />
+                  <FeatureDifferenceTable
+                    title="Biggest Differences"
+                    differences={[...featureDifferences]
+                      .slice(-5)
+                      .sort(
+                        (first, second) =>
+                          second.absolute_difference -
+                          first.absolute_difference,
+                      )}
+                  />
+                </div>
+                <p className="feature-differences-note">
+                  Standardized differences are measured in standard deviations.
+                  Positive values indicate higher values for {selectedPlayer};
+                  negative values indicate higher values for {comparisonPlayer}.
+                </p>
+              </>
+            )}
+        </section>
         {comparisonProfiles && (
           <div className="profile-table-wrapper">
             <table className="profile-table comparison-table">
