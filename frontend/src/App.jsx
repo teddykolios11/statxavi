@@ -1358,7 +1358,7 @@ function App({ season }) {
       className={`page player-page${selectedPlayer ? " has-selected-player" : ""}`}
     >
       <section className="search-panel" aria-labelledby="page-title">
-        <h1 id="page-title">Player search</h1>
+        <h1 id="page-title">Player Search</h1>
         <div className="search-form">
           <label className="visually-hidden" htmlFor="player-query">
             Search players
