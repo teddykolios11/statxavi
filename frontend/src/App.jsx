@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   CartesianGrid,
   ResponsiveContainer,
   Scatter,
   ScatterChart,
+  Text,
   Tooltip,
   XAxis,
   YAxis,
@@ -528,10 +529,46 @@ function PCAMapTooltip({ active, payload, xAxis, yAxis }) {
   );
 }
 
+function PCAMapAxisLabel({
+  x,
+  y,
+  value,
+  angle,
+  fill,
+  textAnchor,
+  verticalAnchor,
+  onHover,
+  onLeave,
+  isActive,
+}) {
+  return (
+    <Text
+      x={x}
+      y={y}
+      angle={angle}
+      fill={fill}
+      textAnchor={textAnchor}
+      verticalAnchor={verticalAnchor}
+      className="pca-axis-label"
+      role="img"
+      tabIndex={0}
+      aria-label={`${value} axis label. Focus or hover to view top contributing features.`}
+      aria-describedby={isActive ? "pca-axis-tooltip" : undefined}
+      onMouseEnter={(event) => onHover(event, value)}
+      onMouseLeave={onLeave}
+      onFocus={(event) => onHover(event, value)}
+      onBlur={onLeave}
+    >
+      {value}
+    </Text>
+  );
+}
+
 function PCAMap({
   players,
   isLoading,
   error,
+  season,
   selectedPlayer,
   selectedPositionGroup,
   isLoadingPositionGroup,
@@ -539,6 +576,96 @@ function PCAMap({
   const [xAxis, setXAxis] = useState("PC1");
   const [yAxis, setYAxis] = useState("PC2");
   const [samePositionOnly, setSamePositionOnly] = useState(true);
+  const [topPcaFeatures, setTopPcaFeatures] = useState(null);
+  const [pcaFeaturesError, setPcaFeaturesError] = useState("");
+  const [isLoadingPcaFeatures, setIsLoadingPcaFeatures] = useState(false);
+  const [hoveredPcaComponent, setHoveredPcaComponent] = useState("");
+  const [pcaTooltipPosition, setPcaTooltipPosition] = useState({ left: 0, top: 0 });
+  const pcaChartRef = useRef(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
+    const seasonParams = new URLSearchParams({ season });
+    setTopPcaFeatures(null);
+    setPcaFeaturesError("");
+    setIsLoadingPcaFeatures(true);
+
+    fetch(`/players/top_pca_features?${seasonParams}`, {
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Could not load PCA feature contributions.");
+        }
+        return response.json();
+      })
+      .then((result) => {
+        if (!result?.top_features || typeof result.top_features !== "object") {
+          throw new Error("The PCA feature response was invalid.");
+        }
+        if (active) {
+          setTopPcaFeatures(result.top_features);
+        }
+      })
+      .catch((requestError) => {
+        if (active) {
+          setPcaFeaturesError(requestError.message);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setIsLoadingPcaFeatures(false);
+        }
+      });
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [season]);
+
+  function showPcaFeatureTooltip(event, component) {
+    const chartBounds = pcaChartRef.current?.getBoundingClientRect();
+    const labelBounds = event.currentTarget.getBoundingClientRect();
+    if (!chartBounds) {
+      return;
+    }
+
+    const clientX =
+      event.type === "mouseenter"
+        ? event.clientX
+        : labelBounds.left + labelBounds.width / 2;
+    const clientY =
+      event.type === "mouseenter"
+        ? event.clientY
+        : labelBounds.top + labelBounds.height / 2;
+    const pointerX = clientX - chartBounds.left;
+    const pointerY = clientY - chartBounds.top;
+
+    setPcaTooltipPosition({
+      left: Math.max(8, Math.min(pointerX + 12, chartBounds.width - 280)),
+      top: Math.max(8, Math.min(pointerY + 12, chartBounds.height - 160)),
+    });
+    setHoveredPcaComponent(component);
+  }
+
+  const hoveredFeatures = Array.isArray(topPcaFeatures?.[hoveredPcaComponent])
+    ? topPcaFeatures[hoveredPcaComponent]
+    : [];
+  const validHoveredFeatures = hoveredFeatures.filter(
+    (item) =>
+      item &&
+      typeof item.feature === "string" &&
+      Number.isFinite(Number(item.loading)) &&
+      Number.isFinite(Number(item.magnitude)),
+  );
+  const positiveFeatures = validHoveredFeatures
+    .filter(({ loading }) => Number(loading) > 0)
+    .sort((first, second) => Number(second.magnitude) - Number(first.magnitude));
+  const negativeFeatures = validHoveredFeatures
+    .filter(({ loading }) => Number(loading) < 0)
+    .sort((first, second) => Number(second.magnitude) - Number(first.magnitude));
 
   const canApplyPositionFilter =
     !samePositionOnly || Boolean(selectedPositionGroup);
@@ -641,7 +768,44 @@ function PCAMap({
             </p>
           )}
           {chartPlayers.length > 0 && (
-            <div className="pca-chart">
+            <div className="pca-chart" ref={pcaChartRef}>
+              {hoveredPcaComponent && (
+                <div
+                  id="pca-axis-tooltip"
+                  className="pca-axis-tooltip"
+                  role="tooltip"
+                  style={pcaTooltipPosition}
+                >
+                  <strong>
+                    {hoveredPcaComponent} — Top Contributing Features
+                  </strong>
+                  <span>
+                    Features with the strongest influence on this principal
+                    component. Signs indicate the direction of their
+                    contribution.
+                  </span>
+                  {isLoadingPcaFeatures ? (
+                    <span>Loading contributing features...</span>
+                  ) : pcaFeaturesError ? (
+                    <span>Contributing features are unavailable.</span>
+                  ) : positiveFeatures.length + negativeFeatures.length > 0 ? (
+                    <ul>
+                      {positiveFeatures.map(({ feature }) => (
+                        <li className="positive" key={feature}>
+                          ++{feature}
+                        </li>
+                      ))}
+                      {negativeFeatures.map(({ feature }) => (
+                        <li className="negative" key={feature}>
+                          --{feature}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span>No contributing features are available.</span>
+                  )}
+                </div>
+              )}
               <ResponsiveContainer width="100%" height="100%">
                 <ScatterChart margin={{ top: 12, right: 24, bottom: 12, left: 8 }}>
                   <CartesianGrid stroke="#e4e7ec" />
@@ -655,6 +819,17 @@ function PCAMap({
                       position: "insideBottom",
                       offset: -6,
                       fill: "#586174",
+                      content: (labelProps) => (
+                        <PCAMapAxisLabel
+                          {...labelProps}
+                          value={xAxis}
+                          textAnchor="middle"
+                          verticalAnchor="end"
+                          onHover={showPcaFeatureTooltip}
+                          onLeave={() => setHoveredPcaComponent("")}
+                          isActive={hoveredPcaComponent === xAxis}
+                        />
+                      ),
                     }}
                   />
                   <YAxis
@@ -667,6 +842,17 @@ function PCAMap({
                       angle: -90,
                       position: "insideLeft",
                       fill: "#586174",
+                      content: (labelProps) => (
+                        <PCAMapAxisLabel
+                          {...labelProps}
+                          value={yAxis}
+                          textAnchor="middle"
+                          verticalAnchor="middle"
+                          onHover={showPcaFeatureTooltip}
+                          onLeave={() => setHoveredPcaComponent("")}
+                          isActive={hoveredPcaComponent === yAxis}
+                        />
+                      ),
                     }}
                   />
                   <Tooltip
@@ -1374,6 +1560,7 @@ function App({ season }) {
             players={pcaPlayers}
             isLoading={isLoadingPcaMap}
             error={pcaMapError}
+            season={season}
             selectedPlayer={selectedPlayer}
             selectedPositionGroup={playerInfo?.position_group}
             isLoadingPositionGroup={isLoadingPlayerInfo}
