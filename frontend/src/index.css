@@ -775,9 +775,57 @@ h1 {
 }
 
 .pca-chart {
+  position: relative;
   width: 100%;
   height: 25rem;
   margin-top: 0.75rem;
+}
+
+.pca-axis-label {
+  cursor: help;
+}
+
+.pca-axis-label:focus-visible {
+  outline: none;
+  text-decoration: underline;
+  text-decoration-color: #315bd6;
+  text-underline-offset: 2px;
+}
+
+.pca-axis-tooltip {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  width: min(17rem, calc(100% - 1rem));
+  gap: 0.35rem;
+  padding: 0.65rem 0.75rem;
+  color: #172033;
+  background: #fff;
+  border: 1px solid #cbd2dc;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.5rem 1.25rem rgb(23 32 51 / 16%);
+  font-size: 0.75rem;
+  pointer-events: none;
+}
+
+.pca-axis-tooltip strong {
+  font-size: 0.8125rem;
+}
+
+.pca-axis-tooltip ul {
+  display: grid;
+  gap: 0.1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pca-axis-tooltip .positive {
+  color: #2449b2;
+}
+
+.pca-axis-tooltip .negative {
+  color: #a54800;
 }
 
 .pca-tooltip {

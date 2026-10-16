@@ -52,6 +52,9 @@ def load_season_data(season):
         "scores": pd.read_parquet(
             pca_dir / "player_scores.parquet"
         ),
+        "loadings": pd.read_parquet(
+            pca_dir / "loadings.parquet"
+        ),
         "scaler": scaler,
         "metadata": metadata,
     }
@@ -95,6 +98,37 @@ def get_pca_map(season: str = DEFAULT_SEASON):
     )
 
     return pca_map_scores.to_dict(orient="records")
+
+
+@app.get("/players/top_pca_features")
+def get_top_pc_features(season: str = DEFAULT_SEASON, n_features: int = 5):
+
+    pca_loadings = get_season_data(season)["loadings"]
+
+    pc_cols = [f"PC{i}" for i in range(1, PCA_N_COMPONENTS + 1)]
+
+    results = {}
+
+    for pc in pc_cols:
+        top_features = (
+            pca_loadings[["feature", pc]]
+            .assign(abs_loading=lambda df: df[pc].abs())
+            .nlargest(n_features, "abs_loading")
+        )
+
+        results[pc] = [
+            {
+                "feature": row["feature"],
+                "loading": round(float(row[pc]), 4),
+                "magnitude": round(float(row["abs_loading"]), 4),
+            }
+            for _, row in top_features.iterrows()
+        ]
+
+    return {
+        "season": season,
+        "top_features": results,
+    }
 
 
 @app.get("/players/{player_name}/similar")
