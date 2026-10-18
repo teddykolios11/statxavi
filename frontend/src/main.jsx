@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
+import About from "./About.jsx";
 import Footer from "./Footer.jsx";
 import Header from "./Header.jsx";
+import Methodology from "./Methodology.jsx";
 import "./index.css";
 
 const defaultSeason = "2015-2016";
@@ -14,6 +16,7 @@ function StatXavi() {
   const [season, setSeason] = useState(defaultSeason);
   const [seasons, setSeasons] = useState(defaultSeasons);
   const [seasonError, setSeasonError] = useState("");
+  const [activeTab, setActiveTab] = useState("players");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -54,8 +57,12 @@ function StatXavi() {
         seasons={seasons}
         seasonError={seasonError}
         onSeasonChange={setSeason}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
       />
-      <App key={season} season={season} />
+      <App key={season} season={season} activeTab={activeTab} />
+      <Methodology activeTab={activeTab} />
+      <About activeTab={activeTab} />
       <Footer />
     </>
   );

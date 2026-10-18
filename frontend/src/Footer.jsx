@@ -6,7 +6,7 @@ function Footer() {
       <div className="site-footer-content">
         <div className="footer-branding">
           <strong className="footer-brand">StatXavi</strong>
-          <p>Explore the numbers behind the beautiful game.</p>
+          <p>Occupy the half-space of player analysis.</p>
         </div>
         <p className="footer-attribution">
           Powered by{" "}

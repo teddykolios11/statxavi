@@ -889,7 +889,7 @@ function PCAMap({
   );
 }
 
-function App({ season }) {
+function App({ season, activeTab }) {
   const [query, setQuery] = useState("");
   const [players, setPlayers] = useState([]);
   const [searchError, setSearchError] = useState("");
@@ -1234,7 +1234,14 @@ function App({ season }) {
     : [];
 
   return comparisonPlayer ? (
-    <main className="page comparison-page">
+    <main
+      className="page comparison-page"
+      id="player-search-panel"
+      role="tabpanel"
+      aria-labelledby="player-search-tab"
+      hidden={activeTab !== "players"}
+      tabIndex={0}
+    >
       <section className="search-panel" aria-labelledby="comparison-title">
         <button
           type="button"
@@ -1356,9 +1363,14 @@ function App({ season }) {
   ) : (
     <main
       className={`page player-page${selectedPlayer ? " has-selected-player" : ""}`}
+      id="player-search-panel"
+      role="tabpanel"
+      aria-labelledby="player-search-tab"
+      hidden={activeTab !== "players"}
+      tabIndex={0}
     >
       <section className="search-panel" aria-labelledby="page-title">
-        <h1 id="page-title">Player search</h1>
+        <h1 id="page-title">Player Search</h1>
         <div className="search-form">
           <label className="visually-hidden" htmlFor="player-query">
             Search players
