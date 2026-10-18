@@ -464,6 +464,11 @@ function HexagonProfile({ positionGroup, percentiles }) {
           )}
         </div>
       </div>
+      <p className="feature-differences-note">
+        Shows a player’s performance across six key attributes relative to
+        others in their position group. Each attribute combines percentile
+        rankings from related statistics.
+      </p>
     </section>
   );
 }
@@ -887,6 +892,11 @@ function PCAMap({
           )}
         </>
       )}
+      <p className="feature-differences-note">
+        Explore player similarities in PCA space, where nearby players have
+        similar statistical profiles. Hover over each axis to see which metrics
+        contribute most to that component.
+      </p>
     </section>
   );
 }
@@ -1590,6 +1600,12 @@ function App({ season, activeTab }) {
                 })}
               </ul>
             )}
+            <p className="feature-differences-note">
+              Displays the five most statistically similar players based on our
+              PCA model. Similarity scores reflect how closely their
+              statistical profiles align. Click ‘Compare Profiles’ for a
+              detailed breakdown.
+            </p>
           </section>
           <PCAMap
             players={pcaPlayers}
