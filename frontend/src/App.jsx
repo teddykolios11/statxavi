@@ -894,7 +894,7 @@ function PCAMap({
       )}
       <p className="feature-differences-note">
         Explore player similarities in PCA space, where nearby players have
-        similar statistical profiles. Hover over each axis to see which metrics
+        similar statistical profiles. Select different components to plot and hover over each axis to see which metrics
         contribute most to that component.
       </p>
     </section>
