@@ -1,0 +1,63 @@
+{
+    "season_id": 106,
+    "season": "2022",
+    "min_minutes": 180,
+    "n_players": 351,
+    "n_features": 21,
+    "features": [
+        "goals_per90",
+        "xG_per90",
+        "shots_per90",
+        "xA_per90",
+        "shot_assists_per90",
+        "progressive_passes_per90",
+        "passes_completed_per90",
+        "pass_completion_pct",
+        "dribbles_attempted_per90",
+        "dribbles_completed_per90",
+        "carries_per90",
+        "progressive_carries_per90",
+        "ball_recoveries_won_per90",
+        "interceptions_won_per90",
+        "duels_per90",
+        "tackles_won_per90",
+        "blocks_per90",
+        "clearances_per90",
+        "pressures_per90",
+        "fouls_per90",
+        "poss_won_final_third_per90"
+    ],
+    "competitions": [
+        "FIFA World Cup"
+    ],
+    "pca": {
+        "n_components": 10,
+        "original_n_features": 21,
+        "explained_variance_ratio": [
+            0.23800039096926853,
+            0.16468019814747056,
+            0.12090974296100017,
+            0.07874193936662803,
+            0.06264441870967986,
+            0.04826735217493593,
+            0.04250760810687545,
+            0.03729047612260181,
+            0.035379060247541186,
+            0.03144343414161015
+        ],
+        "cumulative_explained_variance_ratio": [
+            0.23800039096926853,
+            0.4026805891167391,
+            0.5235903320777393,
+            0.6023322714443673,
+            0.6649766901540471,
+            0.7132440423289831,
+            0.7557516504358586,
+            0.7930421265584604,
+            0.8284211868060016,
+            0.8598646209476117
+        ],
+        "total_explained_variance_ratio": 0.8598646209476117,
+        "median_pairwise_distance": 5.492773721395554
+    }
+}

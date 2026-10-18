@@ -1,0 +1,63 @@
+{
+    "season_id": 282,
+    "season": "2024",
+    "min_minutes": 180,
+    "n_players": 266,
+    "n_features": 21,
+    "features": [
+        "goals_per90",
+        "xG_per90",
+        "shots_per90",
+        "xA_per90",
+        "shot_assists_per90",
+        "progressive_passes_per90",
+        "passes_completed_per90",
+        "pass_completion_pct",
+        "dribbles_attempted_per90",
+        "dribbles_completed_per90",
+        "carries_per90",
+        "progressive_carries_per90",
+        "ball_recoveries_won_per90",
+        "interceptions_won_per90",
+        "duels_per90",
+        "tackles_won_per90",
+        "blocks_per90",
+        "clearances_per90",
+        "pressures_per90",
+        "fouls_per90",
+        "poss_won_final_third_per90"
+    ],
+    "competitions": [
+        "UEFA Euro"
+    ],
+    "pca": {
+        "n_components": 10,
+        "original_n_features": 21,
+        "explained_variance_ratio": [
+            0.24206833391994997,
+            0.16857849634042227,
+            0.11849778535679402,
+            0.07183879766443566,
+            0.06302597090413477,
+            0.04797914027036918,
+            0.04410505692835326,
+            0.04015909006484603,
+            0.03536354322019483,
+            0.03134321711688038
+        ],
+        "cumulative_explained_variance_ratio": [
+            0.24206833391994997,
+            0.41064683026037224,
+            0.5291446156171663,
+            0.600983413281602,
+            0.6640093841857367,
+            0.7119885244561059,
+            0.7560935813844591,
+            0.7962526714493052,
+            0.8316162146695001,
+            0.8629594317863805
+        ],
+        "total_explained_variance_ratio": 0.8629594317863803,
+        "median_pairwise_distance": 5.629029235642255
+    }
+}

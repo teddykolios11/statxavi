@@ -1,0 +1,63 @@
+{
+    "season_id": 43,
+    "season": "2020",
+    "min_minutes": 180,
+    "n_players": 284,
+    "n_features": 21,
+    "features": [
+        "goals_per90",
+        "xG_per90",
+        "shots_per90",
+        "xA_per90",
+        "shot_assists_per90",
+        "progressive_passes_per90",
+        "passes_completed_per90",
+        "pass_completion_pct",
+        "dribbles_attempted_per90",
+        "dribbles_completed_per90",
+        "carries_per90",
+        "progressive_carries_per90",
+        "ball_recoveries_won_per90",
+        "interceptions_won_per90",
+        "duels_per90",
+        "tackles_won_per90",
+        "blocks_per90",
+        "clearances_per90",
+        "pressures_per90",
+        "fouls_per90",
+        "poss_won_final_third_per90"
+    ],
+    "competitions": [
+        "UEFA Euro"
+    ],
+    "pca": {
+        "n_components": 10,
+        "original_n_features": 21,
+        "explained_variance_ratio": [
+            0.24183427238122546,
+            0.1623618799021363,
+            0.12530556846362242,
+            0.0767442123006925,
+            0.059898104729180356,
+            0.053002152131573915,
+            0.04465012019420285,
+            0.03720760338066882,
+            0.034370574260995976,
+            0.026767594093348106
+        ],
+        "cumulative_explained_variance_ratio": [
+            0.24183427238122546,
+            0.40419615228336175,
+            0.5295017207469842,
+            0.6062459330476767,
+            0.666144037776857,
+            0.7191461899084309,
+            0.7637963101026338,
+            0.8010039134833027,
+            0.8353744877442987,
+            0.8621420818376467
+        ],
+        "total_explained_variance_ratio": 0.8621420818376467,
+        "median_pairwise_distance": 5.699422611051963
+    }
+}
