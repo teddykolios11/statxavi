@@ -1,0 +1,63 @@
+{
+    "season_id": 3,
+    "season": "2018",
+    "min_minutes": 180,
+    "n_players": 356,
+    "n_features": 21,
+    "features": [
+        "goals_per90",
+        "xG_per90",
+        "shots_per90",
+        "xA_per90",
+        "shot_assists_per90",
+        "progressive_passes_per90",
+        "passes_completed_per90",
+        "pass_completion_pct",
+        "dribbles_attempted_per90",
+        "dribbles_completed_per90",
+        "carries_per90",
+        "progressive_carries_per90",
+        "ball_recoveries_won_per90",
+        "interceptions_won_per90",
+        "duels_per90",
+        "tackles_won_per90",
+        "blocks_per90",
+        "clearances_per90",
+        "pressures_per90",
+        "fouls_per90",
+        "poss_won_final_third_per90"
+    ],
+    "competitions": [
+        "FIFA World Cup"
+    ],
+    "pca": {
+        "n_components": 10,
+        "original_n_features": 21,
+        "explained_variance_ratio": [
+            0.2497209413636385,
+            0.15977791391939325,
+            0.11979141927937846,
+            0.07601685447617736,
+            0.057827331368292746,
+            0.05207440342206976,
+            0.044256536586372644,
+            0.03737923160978807,
+            0.036188929506955805,
+            0.030382064179342864
+        ],
+        "cumulative_explained_variance_ratio": [
+            0.2497209413636385,
+            0.40949885528303176,
+            0.5292902745624102,
+            0.6053071290385875,
+            0.6631344604068803,
+            0.71520886382895,
+            0.7594654004153226,
+            0.7968446320251107,
+            0.8330335615320665,
+            0.8634156257114094
+        ],
+        "total_explained_variance_ratio": 0.8634156257114095,
+        "median_pairwise_distance": 5.551620053750712
+    }
+}

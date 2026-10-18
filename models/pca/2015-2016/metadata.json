@@ -1,0 +1,66 @@
+{
+    "season_id": 27,
+    "season": "2015-2016",
+    "min_minutes": 600,
+    "n_players": 1560,
+    "n_features": 21,
+    "features": [
+        "goals_per90",
+        "xG_per90",
+        "shots_per90",
+        "xA_per90",
+        "shot_assists_per90",
+        "progressive_passes_per90",
+        "passes_completed_per90",
+        "pass_completion_pct",
+        "dribbles_attempted_per90",
+        "dribbles_completed_per90",
+        "carries_per90",
+        "progressive_carries_per90",
+        "ball_recoveries_won_per90",
+        "interceptions_won_per90",
+        "duels_per90",
+        "tackles_won_per90",
+        "blocks_per90",
+        "clearances_per90",
+        "pressures_per90",
+        "fouls_per90",
+        "poss_won_final_third_per90"
+    ],
+    "competitions": [
+        "La Liga",
+        "Ligue 1",
+        "Premier League",
+        "Serie A"
+    ],
+    "pca": {
+        "n_components": 10,
+        "original_n_features": 21,
+        "explained_variance_ratio": [
+            0.3201141071923509,
+            0.21984413528411165,
+            0.13352622846509532,
+            0.07037383249203544,
+            0.046769533285287074,
+            0.04041446267313223,
+            0.028712247858935384,
+            0.024200369078151346,
+            0.019888203310379424,
+            0.01829395610335674
+        ],
+        "cumulative_explained_variance_ratio": [
+            0.3201141071923509,
+            0.5399582424764625,
+            0.6734844709415578,
+            0.7438583034335933,
+            0.7906278367188804,
+            0.8310422993920126,
+            0.8597545472509479,
+            0.8839549163290993,
+            0.9038431196394787,
+            0.9221370757428354
+        ],
+        "total_explained_variance_ratio": 0.9221370757428354,
+        "median_pairwise_distance": 5.748820260149995
+    }
+}

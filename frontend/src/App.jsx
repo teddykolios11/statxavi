@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { API_BASE_URL } from "./config.js";
 
 const percentileColorByMetric = {
   goals: "blue",
@@ -467,7 +468,7 @@ function HexagonProfile({ positionGroup, percentiles }) {
 }
 
 async function fetchPlayerProfile(playerName, season, signal) {
-  const playerPath = `/players/${encodeURIComponent(playerName)}`;
+  const playerPath = `${API_BASE_URL}/players/${encodeURIComponent(playerName)}`;
   const seasonQuery = new URLSearchParams({ season });
   const [featuresResponse, percentilesResponse] = await Promise.all([
     fetch(`${playerPath}/features?${seasonQuery}`, { signal }),
@@ -591,7 +592,7 @@ function PCAMap({
     setPcaFeaturesError("");
     setIsLoadingPcaFeatures(true);
 
-    fetch(`/players/top_pca_features?${seasonParams}`, {
+    fetch(`${API_BASE_URL}/players/top_pca_features?${seasonParams}`, {
       signal: controller.signal,
     })
       .then((response) => {
@@ -929,7 +930,9 @@ function App({ season, activeTab }) {
     setPcaMapError("");
     setPcaPlayers([]);
 
-    fetch(`/players/pca-map?${seasonParams}`, { signal: controller.signal })
+    fetch(`${API_BASE_URL}/players/pca-map?${seasonParams}`, {
+      signal: controller.signal,
+    })
       .then((response) => {
         if (!response.ok) {
           throw new Error("Could not load the PCA map. Please try again.");
@@ -982,7 +985,7 @@ function App({ season, activeTab }) {
       query: searchTerm,
       season,
     });
-    fetch(`/players?${searchParams}`, {
+    fetch(`${API_BASE_URL}/players?${searchParams}`, {
       signal: controller.signal,
     })
       .then((response) => {
@@ -1031,7 +1034,7 @@ function App({ season, activeTab }) {
     setPlayerInfo(null);
     setPlayerPercentiles(null);
 
-    const playerPath = `/players/${encodeURIComponent(selectedPlayer)}`;
+    const playerPath = `${API_BASE_URL}/players/${encodeURIComponent(selectedPlayer)}`;
     const seasonQuery = new URLSearchParams({ season });
     Promise.all([
       fetch(`${playerPath}/info?${seasonQuery}`, {
@@ -1133,7 +1136,7 @@ function App({ season, activeTab }) {
     });
 
     fetch(
-      `/players/${encodeURIComponent(selectedPlayer)}/feature_differences?${differenceParams}`,
+      `${API_BASE_URL}/players/${encodeURIComponent(selectedPlayer)}/feature_differences?${differenceParams}`,
       { signal: controller.signal },
     )
       .then((response) => {
@@ -1193,7 +1196,7 @@ function App({ season, activeTab }) {
       similarParams.set("position_group", similarPositionGroup);
     }
     fetch(
-      `/players/${encodeURIComponent(selectedPlayer)}/similar?${similarParams}`,
+      `${API_BASE_URL}/players/${encodeURIComponent(selectedPlayer)}/similar?${similarParams}`,
       { signal: controller.signal },
     )
       .then((response) => {

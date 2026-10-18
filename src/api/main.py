@@ -6,6 +6,7 @@ import json
 import pickle
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.modeling.similarity import find_similar_players
 from src.utils import PCA_FEATURE_COLUMNS, PCA_N_COMPONENTS
@@ -14,6 +15,18 @@ from src.utils import PCA_FEATURE_COLUMNS, PCA_N_COMPONENTS
 app = FastAPI(
     title="StatsBomb Player Similarity API",
     version="1.0.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",  # Local React development
+        "http://localhost:5173",  # Local Vite development
+        "https://your-frontend-domain.com",  # Deployed frontend
+    ],
+    allow_credentials=False,
+    allow_methods=["GET"],
+    allow_headers=["*"],
 )
 
 project_dir = Path(__file__).resolve().parent.parent.parent

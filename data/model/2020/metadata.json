@@ -1,0 +1,33 @@
+{
+    "season_id": 43,
+    "season": "2020",
+    "min_minutes": 180,
+    "n_players": 284,
+    "n_features": 21,
+    "features": [
+        "goals_per90",
+        "xG_per90",
+        "shots_per90",
+        "xA_per90",
+        "shot_assists_per90",
+        "progressive_passes_per90",
+        "passes_completed_per90",
+        "pass_completion_pct",
+        "dribbles_attempted_per90",
+        "dribbles_completed_per90",
+        "carries_per90",
+        "progressive_carries_per90",
+        "ball_recoveries_won_per90",
+        "interceptions_won_per90",
+        "duels_per90",
+        "tackles_won_per90",
+        "blocks_per90",
+        "clearances_per90",
+        "pressures_per90",
+        "fouls_per90",
+        "poss_won_final_third_per90"
+    ],
+    "competitions": [
+        "UEFA Euro"
+    ]
+}

@@ -9,6 +9,8 @@ venv/
 node_modules/
 dist/
 .env.local
+!.env.development
+!.env.production
 
 # Jupyter
 .ipynb_checkpoints/
@@ -16,11 +18,13 @@ dist/
 # macOS
 .DS_Store
 
-# Generated datasets and models
+# Generated datasets (not needed for deployment)
 data/raw/
 data/processed/
-data/model/
-models/
+
+# Keep model datasets and PCA artifacts
+!data/model/
+!models/
 
 # MLflow
 mlruns/

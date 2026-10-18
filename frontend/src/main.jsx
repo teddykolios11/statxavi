@@ -5,6 +5,7 @@ import About from "./About.jsx";
 import Footer from "./Footer.jsx";
 import Header from "./Header.jsx";
 import Methodology from "./Methodology.jsx";
+import { API_BASE_URL } from "./config.js";
 import "./index.css";
 
 const defaultSeason = "2015-2016";
@@ -22,7 +23,7 @@ function StatXavi() {
     const controller = new AbortController();
     let active = true;
 
-    fetch("/seasons", { signal: controller.signal })
+    fetch(`${API_BASE_URL}/seasons`, { signal: controller.signal })
       .then((response) => {
         if (!response.ok) {
           throw new Error("Could not load available datasets.");
