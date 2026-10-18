@@ -10,6 +10,7 @@ import {
   YAxis,
 } from "recharts";
 import { API_BASE_URL } from "./config.js";
+import LoadingStatus from "./LoadingStatus.jsx";
 
 const percentileColorByMetric = {
   goals: "blue",
@@ -573,6 +574,7 @@ function PCAMap({
   selectedPlayer,
   selectedPositionGroup,
   isLoadingPositionGroup,
+  onRetry,
 }) {
   const [xAxis, setXAxis] = useState("PC1");
   const [yAxis, setYAxis] = useState("PC2");
@@ -743,12 +745,11 @@ function PCAMap({
         </span>
       </div>
 
-      {isLoading && <p className="message">Loading PCA map...</p>}
-      {error && (
-        <p className="message error" role="alert">
-          {error}
-        </p>
-      )}
+      <LoadingStatus
+        isLoading={isLoading}
+        error={error}
+        onRetry={onRetry}
+      />
       {!isLoading && !error && players.length === 0 && (
         <p className="message">No PCA player data found for this season.</p>
       )}
@@ -915,7 +916,8 @@ function App({ season, activeTab }) {
     useState(false);
   const [pcaPlayers, setPcaPlayers] = useState([]);
   const [pcaMapError, setPcaMapError] = useState("");
-  const [isLoadingPcaMap, setIsLoadingPcaMap] = useState(false);
+  const [isLoadingPcaMap, setIsLoadingPcaMap] = useState(true);
+  const [pcaMapRetryCount, setPcaMapRetryCount] = useState(0);
 
   function selectPlayer(playerName) {
     setQuery(playerName);
@@ -962,7 +964,7 @@ function App({ season, activeTab }) {
       active = false;
       controller.abort();
     };
-  }, [season]);
+  }, [season, pcaMapRetryCount]);
 
   useEffect(() => {
     const searchTerm = query.trim();
@@ -1579,6 +1581,7 @@ function App({ season, activeTab }) {
             selectedPlayer={selectedPlayer}
             selectedPositionGroup={playerInfo?.position_group}
             isLoadingPositionGroup={isLoadingPlayerInfo}
+            onRetry={() => setPcaMapRetryCount((count) => count + 1)}
           />
         </div>
       )}

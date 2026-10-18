@@ -460,6 +460,45 @@ h3 {
   color: #586174;
 }
 
+.loading-status {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+  color: #586174;
+  font-size: 0.875rem;
+}
+
+.loading-spinner {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: none;
+  border: 2px solid #dce3f0;
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: loading-spinner-rotate 800ms linear infinite;
+}
+
+.loading-status-error {
+  flex-wrap: wrap;
+  color: #b42318;
+}
+
+.loading-status-error p {
+  margin: 0;
+}
+
+.loading-retry-button {
+  margin-top: 0;
+}
+
+@keyframes loading-spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .profile-table-wrapper {
   overflow-x: auto;
 }
@@ -1208,6 +1247,10 @@ h3 {
   .similar-player-card,
   .compare-button {
     transition: none;
+  }
+
+  .loading-spinner {
+    animation: none;
   }
 }
 
