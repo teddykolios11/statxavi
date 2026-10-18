@@ -897,6 +897,7 @@ function App({ season, activeTab }) {
   const [searchError, setSearchError] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [searchRetryCount, setSearchRetryCount] = useState(0);
   const [selectedPlayer, setSelectedPlayer] = useState("");
   const [comparisonPlayer, setComparisonPlayer] = useState("");
   const [playerInfo, setPlayerInfo] = useState(null);
@@ -1018,7 +1019,7 @@ function App({ season, activeTab }) {
       active = false;
       controller.abort();
     };
-  }, [query, season]);
+  }, [query, season, searchRetryCount]);
 
   useEffect(() => {
     if (!selectedPlayer) {
@@ -1392,7 +1393,24 @@ function App({ season, activeTab }) {
           />
         </div>
 
-        {searchError && <p className="message error">{searchError}</p>}
+        {(isSearching ||
+          searchError ||
+          (!selectedPlayer && (isLoadingPcaMap || pcaMapError))) && (
+          <LoadingStatus
+            key={isSearching ? "search" : "pca"}
+            isLoading={
+              isSearching || (!selectedPlayer && isLoadingPcaMap)
+            }
+            error={isSearching ? "" : searchError || pcaMapError}
+            onRetry={() => {
+              if (searchError) {
+                setSearchRetryCount((count) => count + 1);
+              } else {
+                setPcaMapRetryCount((count) => count + 1);
+              }
+            }}
+          />
+        )}
         {!searchError && players.length === 0 && !isSearching && hasSearched && (
           <p className="message">No players found.</p>
         )}
