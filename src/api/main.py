@@ -22,7 +22,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",  # Local React development
         "http://localhost:5173",  # Local Vite development
-        "https://your-frontend-domain.com",  # Deployed frontend
+        "https://statxavi.onrender.com",  # Deployed frontend
     ],
     allow_credentials=False,
     allow_methods=["GET"],
