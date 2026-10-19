@@ -1,4 +1,4 @@
-# StatXavi ⚽
+# [StatXavi](https://statxavi.vercel.app/)
 
 **Explore football player profiles and discover similar players using event data and principal component analysis (PCA).**
 
