@@ -1,16 +1,12 @@
 # StatXavi ⚽
 
+https://statxavi.vercel.app/
+
 **Explore football player profiles and discover similar players using event data and principal component analysis (PCA).**
 
 StatXavi is an end-to-end soccer analytics project that turns StatsBomb event data into interpretable player statistics, lower-dimensional player representations, and interactive similarity recommendations. It combines a Python data pipeline, scikit-learn modeling, a FastAPI backend, and a React frontend.
 
 > **Project status:** Active development. Current analysis focuses on the 2015/16 season and available StatsBomb open-data matches from the Premier League, La Liga, Serie A, and Ligue 1. Coverage is limited to matches present in the open dataset; results should not be interpreted as complete league-season coverage without verification.
-
-
-
-<img width="1269" height="623" alt="statxavi_ss_comparison" src="https://github.com/user-attachments/assets/b2df4a76-19d9-4100-82fd-354a04b3657e" />
-<img width="1320" height="623" alt="statxavi_ss_similar" src="https://github.com/user-attachments/assets/1222a448-6c52-4e0f-aca4-18e5a99dbcbd" />
-<img width="752" height="642" alt="statxavi_ss_main" src="https://github.com/user-attachments/assets/51dd7af5-991b-4077-8d65-5d802ed490a8" />
 
 
 ## Features
